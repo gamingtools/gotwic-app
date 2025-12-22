@@ -8,7 +8,7 @@
 </script>
 
 <svelte:head>
-	<title>Friendship Calculator - GoTWiC Tools</title>
+	<title>GoTWiC - Friendship Calculator - Game of Thrones Winter is Coming</title>
 	<meta
 		name="description"
 		content="Optimize gift distribution to commanders in Game of Thrones: Winter is Coming"

@@ -1,24 +1,45 @@
 <script lang="ts">
 	import { friendshipStore } from '$lib/stores/friendship.svelte';
+	import { toastStore } from '$lib/stores/toast.svelte';
+	import Modal from './Modal.svelte';
+	import PromptModal from './PromptModal.svelte';
 
 	let fileInput: HTMLInputElement;
+	let resetBackup: string | null = $state(null);
+
+	// Modal states
+	let showAddProfileModal = $state(false);
+	let showDeleteProfileModal = $state(false);
+	let showResetModal = $state(false);
 
 	function handleProfileChange(event: Event) {
 		const target = event.target as HTMLSelectElement;
 		friendshipStore.changeProfile(target.value);
+		toastStore.info(`Switched to ${target.value}`);
 	}
 
 	function askProfile() {
-		const name = window.prompt('Enter new profile name (only letters and numbers are allowed)');
-		if (name) {
-			friendshipStore.addProfile(name);
+		showAddProfileModal = true;
+	}
+
+	function handleAddProfile(name: string) {
+		showAddProfileModal = false;
+		if (friendshipStore.addProfile(name)) {
+			toastStore.success(`Profile "${name}" created`);
+		} else {
+			toastStore.error('Invalid or duplicate profile name');
 		}
 	}
 
 	function deleteProfile() {
-		if (confirm('Are you sure you want to permanently delete this profile?')) {
-			friendshipStore.deleteProfile();
-		}
+		showDeleteProfileModal = true;
+	}
+
+	function confirmDeleteProfile() {
+		showDeleteProfileModal = false;
+		const name = friendshipStore.currentProfileId;
+		friendshipStore.deleteProfile();
+		toastStore.success(`Profile "${name}" deleted`);
 	}
 
 	function exportData() {
@@ -30,6 +51,7 @@
 		a.download = `${friendshipStore.currentProfileId}.json`;
 		a.click();
 		URL.revokeObjectURL(url);
+		toastStore.success('Profile exported');
 	}
 
 	function importData() {
@@ -53,8 +75,10 @@
 		const reader = new FileReader();
 		reader.onload = () => {
 			const result = reader.result as string;
-			if (!friendshipStore.importProfile(result)) {
-				alert('Failed to import the data.');
+			if (friendshipStore.importProfile(result)) {
+				toastStore.success('Profile imported successfully');
+			} else {
+				toastStore.error('Failed to import profile data');
 			}
 		};
 		reader.readAsText(file);
@@ -62,12 +86,43 @@
 	}
 
 	function resetData() {
-		if (confirm('This will reset all the data. Are you sure?')) {
-			friendshipStore.resetProfile();
+		showResetModal = true;
+	}
+
+	function confirmResetData() {
+		showResetModal = false;
+		// Store backup for undo
+		resetBackup = friendshipStore.exportProfile();
+		friendshipStore.resetProfile();
+		toastStore.info('Profile reset. Click here to undo.');
+
+		// Clear backup after 10 seconds
+		setTimeout(() => {
+			resetBackup = null;
+		}, 10000);
+	}
+
+	function undoReset() {
+		if (resetBackup) {
+			friendshipStore.importProfile(resetBackup);
+			resetBackup = null;
+			toastStore.success('Reset undone');
 		}
 	}
 
 	let showGuide = $state(false);
+
+	// Disable body scroll when guide modal is open
+	$effect(() => {
+		if (showGuide) {
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = '';
+		}
+		return () => {
+			document.body.style.overflow = '';
+		};
+	});
 </script>
 
 <!-- Header Bar -->
@@ -97,7 +152,7 @@
 					onchange={handleProfileChange}
 					value={friendshipStore.currentProfileId}
 				>
-					{#each friendshipStore.profiles as profile}
+					{#each friendshipStore.profiles as profile (profile)}
 						<option value={profile} class="bg-[var(--color-slate)] text-[var(--color-parchment)]">{profile}</option>
 					{/each}
 				</select>
@@ -151,6 +206,18 @@
 				<span class="hidden sm:inline">Reset</span>
 			</button>
 
+			{#if resetBackup}
+				<button
+					onclick={undoReset}
+					class="flex items-center gap-1.5 rounded border border-[var(--color-gold)] bg-[var(--color-gold)]/20 px-2 py-1 lg:px-2.5 lg:py-1.5 text-xs lg:text-sm text-[var(--color-gold)] transition-all hover:bg-[var(--color-gold)]/30 animate-pulse"
+				>
+					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+					</svg>
+					<span>Undo</span>
+				</button>
+			{/if}
+
 			<div class="mx-1 hidden h-6 w-px bg-[var(--color-steel)]/50 sm:block"></div>
 
 			<a
@@ -192,9 +259,9 @@
 		aria-modal="true"
 		tabindex="-1"
 	>
-		<div class="panel animate-fade-in max-h-[90vh] w-full max-w-2xl overflow-y-auto p-6">
+		<div class="panel animate-fade-in flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden p-6">
 			<!-- Header -->
-			<div class="mb-6 flex items-start justify-between">
+			<div class="mb-6 flex shrink-0 items-start justify-between">
 				<div>
 					<h2 class="font-got text-2xl text-[var(--color-gold)]">Tavern Friendship Calculator</h2>
 					<p class="mt-1 text-sm text-[var(--color-ash)]">for Game of Thrones - Winter is Coming Browser Game</p>
@@ -210,7 +277,7 @@
 				</button>
 			</div>
 
-			<div class="space-y-6 text-[var(--color-parchment)]">
+			<div class="space-y-6 overflow-y-auto text-[var(--color-parchment)]">
 				<section>
 					<h3 class="mb-2 font-display text-lg text-[var(--color-gold-bright)]">What is it for?</h3>
 					<ul class="space-y-1 text-sm text-[var(--color-ash)]">
@@ -268,3 +335,37 @@
 		</div>
 	</div>
 {/if}
+
+<!-- Add Profile Modal -->
+<PromptModal
+	open={showAddProfileModal}
+	title="Add New Profile"
+	placeholder="Enter profile name (letters and numbers only)"
+	confirmText="Create"
+	onconfirm={handleAddProfile}
+	oncancel={() => (showAddProfileModal = false)}
+/>
+
+<!-- Delete Profile Modal -->
+<Modal
+	open={showDeleteProfileModal}
+	title="Delete Profile"
+	confirmText="Delete"
+	confirmDanger={true}
+	onconfirm={confirmDeleteProfile}
+	oncancel={() => (showDeleteProfileModal = false)}
+>
+	Are you sure you want to permanently delete the profile "{friendshipStore.currentProfileId}"?
+</Modal>
+
+<!-- Reset Data Modal -->
+<Modal
+	open={showResetModal}
+	title="Reset Profile Data"
+	confirmText="Reset"
+	confirmDanger={true}
+	onconfirm={confirmResetData}
+	oncancel={() => (showResetModal = false)}
+>
+	This will reset all commander data for the current profile. Are you sure?
+</Modal>

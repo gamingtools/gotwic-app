@@ -1,7 +1,9 @@
 <script lang="ts">
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
-	
+	import Toast from '$lib/components/Toast.svelte';
+	import SaveIndicator from '$lib/components/SaveIndicator.svelte';
+
 	let { children } = $props();
 </script>
 
@@ -10,3 +12,5 @@
 </svelte:head>
 
 {@render children()}
+<Toast />
+<SaveIndicator />

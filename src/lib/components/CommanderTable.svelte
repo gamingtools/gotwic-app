@@ -3,6 +3,35 @@
 	import StarRating from './StarRating.svelte';
 	import { COMMANDER_QUALITIES } from '$lib/types';
 
+	let searchQuery = $state('');
+	let tableContainer: HTMLDivElement;
+	let showScrollHint = $state(false);
+
+	// Check if table needs horizontal scroll on mount
+	$effect(() => {
+		if (tableContainer) {
+			const checkScroll = () => {
+				showScrollHint = tableContainer.scrollWidth > tableContainer.clientWidth && tableContainer.scrollLeft === 0;
+			};
+			checkScroll();
+			tableContainer.addEventListener('scroll', checkScroll);
+			window.addEventListener('resize', checkScroll);
+			return () => {
+				tableContainer.removeEventListener('scroll', checkScroll);
+				window.removeEventListener('resize', checkScroll);
+			};
+		}
+	});
+
+	let filteredCommanders = $derived(
+		searchQuery.trim()
+			? friendshipStore.visibleCommanders.filter(c =>
+				c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				c.preferredGift.toLowerCase().includes(searchQuery.toLowerCase())
+			)
+			: friendshipStore.visibleCommanders
+	);
+
 	function getRange(max: number): number[] {
 		return Array.from({ length: max }, (_, i) => i + 1);
 	}
@@ -33,24 +62,60 @@
 </script>
 
 <div class="panel overflow-hidden">
-	<div class="max-h-[400px] overflow-y-auto overflow-x-auto lg:max-h-none">
+	<!-- Search bar -->
+	<div class="border-b border-[var(--color-gold)]/10 px-3 py-2 lg:px-4 lg:py-3">
+		<div class="relative">
+			<svg class="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-ash)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+			</svg>
+			<input
+				type="text"
+				bind:value={searchQuery}
+				placeholder="Search commanders..."
+				class="w-full rounded border border-[var(--color-gold)]/20 bg-[var(--color-void)]/60 py-1.5 pl-9 pr-3 text-sm text-[var(--color-parchment)] placeholder-[var(--color-ash)]/60 transition-colors focus:border-[var(--color-gold)]/50 focus:outline-none"
+			/>
+			{#if searchQuery}
+				<button
+					onclick={() => searchQuery = ''}
+					class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ash)] hover:text-[var(--color-parchment)]"
+					aria-label="Clear search"
+				>
+					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				</button>
+			{/if}
+		</div>
+	</div>
+
+	<!-- Scroll hint for mobile -->
+	{#if showScrollHint}
+		<div class="flex items-center justify-center gap-2 border-b border-[var(--color-gold)]/10 bg-[var(--color-gold)]/5 px-3 py-1.5 text-xs text-[var(--color-ash)] lg:hidden">
+			<svg class="h-4 w-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+			</svg>
+			<span>Swipe to see more columns</span>
+		</div>
+	{/if}
+
+	<div bind:this={tableContainer} class="max-h-[400px] overflow-y-auto overflow-x-auto pb-2 md:pb-0 lg:max-h-none">
 		<table class="w-full text-sm lg:text-base">
 			<thead>
 				<tr class="border-b border-[var(--color-gold)]/20 bg-gradient-to-r from-[var(--color-gold)]/10 via-[var(--color-gold)]/5 to-[var(--color-gold)]/10">
 					<th class="whitespace-nowrap pl-3 pr-2 lg:px-4 py-2 lg:py-3 text-left font-display text-sm font-medium tracking-wide text-[var(--color-gold)]">Name</th>
 					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] sm:table-cell">Gift</th>
-					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell">Apt</th>
-					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell">Fin</th>
-					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell">Cmd</th>
-					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell">Cmbt</th>
-					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell">Lead</th>
+					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="2xl:hidden">Apt</span><span class="hidden 2xl:inline">Aptitude</span></th>
+					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="2xl:hidden">Fin</span><span class="hidden 2xl:inline">Finance</span></th>
+					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="2xl:hidden">Cmd</span><span class="hidden 2xl:inline">Command</span></th>
+					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="2xl:hidden">Cmbt</span><span class="hidden 2xl:inline">Combat</span></th>
+					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="2xl:hidden">Lead</span><span class="hidden 2xl:inline">Leadership</span></th>
 					<th class="whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)]">Quality</th>
 					<th class="whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)]">Level</th>
-					<th class="whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)]">Awaken</th>
+					<th class="whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)]"><span class="2xl:hidden">Awaken</span><span class="hidden 2xl:inline">Awakening</span></th>
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-[var(--color-gold)]/10">
-				{#each friendshipStore.visibleCommanders as commander (commander.id)}
+				{#each filteredCommanders as commander (commander.id)}
 					<tr class="table-row-hover {getQualityBgClass(commander.playerCommander.maxLevel)}">
 						<!-- Name -->
 						<td class="whitespace-nowrap pl-3 pr-2 lg:px-4 py-2 lg:py-3 font-semibold text-[var(--color-parchment)]">{commander.name}</td>
@@ -168,6 +233,16 @@
 									<span class="text-[var(--color-steel)]">-</span>
 								{/if}
 							</div>
+						</td>
+					</tr>
+				{:else}
+					<tr>
+						<td colspan="10" class="px-4 py-8 text-center text-[var(--color-ash)]">
+							{#if searchQuery}
+								No commanders found matching "{searchQuery}"
+							{:else}
+								No commanders available
+							{/if}
 						</td>
 					</tr>
 				{/each}

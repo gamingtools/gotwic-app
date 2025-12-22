@@ -17,6 +17,7 @@ const WEIGHTS_KEY = 'gw-fr-calculationWeights';
 const SETTINGS_KEY = 'gw-fr-profileSettings';
 
 function getStorageKey(base: string, profileId: string): string {
+	// Match Angular: use base key for 'default', append profileId for others
 	return profileId === 'default' ? base : base + profileId;
 }
 
@@ -46,8 +47,12 @@ function removeFromStorage(key: string): void {
 // Create the friendship store using Svelte 5 runes
 function createFriendshipStore() {
 	// Compute initial values before creating reactive state (avoids state_referenced_locally warnings)
-	const initialProfiles = loadFromStorage<string[]>(PROFILES_KEY, ['default']);
-	const initialProfileId = initialProfiles[0] || 'default';
+	// Match Angular: if no profiles or empty array, default to ['default']
+	let initialProfiles = loadFromStorage<string[]>(PROFILES_KEY, []);
+	if (!initialProfiles || initialProfiles.length === 0) {
+		initialProfiles = ['default'];
+	}
+	const initialProfileId = initialProfiles[0];
 	const initialWeights = loadFromStorage<CalculationWeights>(
 		getStorageKey(WEIGHTS_KEY, initialProfileId),
 		{ ...DEFAULT_WEIGHTS }
@@ -88,6 +93,7 @@ function createFriendshipStore() {
 	let weights = $state<CalculationWeights>(initialWeights);
 	let profileSettings = $state<ProfileSettings>(initialSettings);
 	let mergedCommanders = $state<MergedCommander[]>(initialMergedCommanders);
+	let lastSaved = $state<number>(0);
 
 	function recalculateCosts(): void {
 		const results = calculateNextLevelValues({
@@ -111,15 +117,18 @@ function createFriendshipStore() {
 			mergedCommanders.map((mc) => mc.playerCommander)
 		);
 		recalculateCosts();
+		lastSaved = Date.now();
 	}
 
 	function saveWeights(): void {
 		saveToStorage(getStorageKey(WEIGHTS_KEY, currentProfileId), weights);
 		recalculateCosts();
+		lastSaved = Date.now();
 	}
 
 	function saveProfileSettings(): void {
 		saveToStorage(getStorageKey(SETTINGS_KEY, currentProfileId), profileSettings);
+		lastSaved = Date.now();
 	}
 
 	function saveProfiles(): void {
@@ -180,6 +189,9 @@ function createFriendshipStore() {
 				return mergedCommanders.filter((mc) => mc.playerCommander.maxLevel > 0);
 			}
 			return mergedCommanders;
+		},
+		get lastSaved() {
+			return lastSaved;
 		},
 
 		// Profile management
