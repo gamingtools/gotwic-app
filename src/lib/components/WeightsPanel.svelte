@@ -20,16 +20,16 @@
 
 <div class="panel overflow-hidden">
 	<div class="panel-header px-4 py-2.5">
-		<h3 class="font-display font-bold tracking-wide text-[var(--color-gold)]">Weights</h3>
+		<h3 class="font-display font-bold tracking-wide text-(--color-gold)">Weights</h3>
 	</div>
-	<div class="divide-y divide-[var(--color-gold)]/10">
+	<div class="divide-y divide-(--color-gold)/10">
 		{#each weightKeys as key}
 			<div class="table-row-hover flex items-center justify-between px-4 py-2.5">
 				<div class="flex items-center gap-2">
-					<svg class="h-4 w-4 text-[var(--color-gold)]/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg class="h-4 w-4 text-(--color-gold)/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={weightIcons[key]} />
 					</svg>
-					<label class="capitalize text-[var(--color-parchment)]" for="weight-{key}">{key}</label>
+					<label class="capitalize text-(--color-parchment)" for="weight-{key}">{key}</label>
 				</div>
 				<input
 					id="weight-{key}"

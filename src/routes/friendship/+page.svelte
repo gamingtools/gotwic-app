@@ -60,9 +60,9 @@
 
 				<!-- Decorative divider -->
 				<div class="flex items-center gap-4 py-2">
-					<div class="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--color-gold)]/30 to-transparent"></div>
-					<span class="font-display tracking-[0.2em] text-[var(--color-gold)]/60">GIFT PRIORITIES</span>
-					<div class="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--color-gold)]/30 to-transparent"></div>
+					<div class="h-px flex-1 bg-gradient-to-r from-transparent via-(--color-gold)/30 to-transparent"></div>
+					<span class="font-display tracking-[0.2em] text-(--color-gold)/60">GIFT PRIORITIES</span>
+					<div class="h-px flex-1 bg-gradient-to-r from-transparent via-(--color-gold)/30 to-transparent"></div>
 				</div>
 
 				<!-- Gift Priority Panels -->
@@ -77,17 +77,17 @@
 		</div>
 
 		<!-- Footer -->
-		<footer class="mt-12 border-t border-[var(--color-gold)]/10 pt-6">
+		<footer class="mt-12 border-t border-(--color-gold)/10 pt-6">
 			<div class="flex flex-col items-center gap-2 text-center">
 				<div class="flex items-center gap-3">
-					<div class="h-px w-12 bg-gradient-to-r from-transparent to-[var(--color-gold)]/30"></div>
-					<svg class="h-5 w-5 text-[var(--color-gold)]/40" fill="currentColor" viewBox="0 0 24 24">
+					<div class="h-px w-12 bg-gradient-to-r from-transparent to-(--color-gold)/30"></div>
+					<svg class="h-5 w-5 text-(--color-gold)/40" fill="currentColor" viewBox="0 0 24 24">
 						<path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
 					</svg>
-					<div class="h-px w-12 bg-gradient-to-l from-transparent to-[var(--color-gold)]/30"></div>
+					<div class="h-px w-12 bg-gradient-to-l from-transparent to-(--color-gold)/30"></div>
 				</div>
-				<p class="text-sm text-[var(--color-ash)]">Created by Adain Rivers of RYS from K21</p>
-				<p class="text-xs text-[var(--color-steel)]">Many thanks to all contributors for their valuable support and feedback.</p>
+				<p class="text-sm text-(--color-ash)">Created by Adain Rivers of RYS from K21</p>
+				<p class="text-xs text-(--color-steel)">Many thanks to all contributors for their valuable support and feedback.</p>
 			</div>
 		</footer>
 	</main>

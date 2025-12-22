@@ -70,11 +70,12 @@ function createFriendshipStore() {
 	const initialMergedCommanders = commanders
 		.map((commander) => {
 			const existingPc = initialPlayerCommanders.find((pc) => pc.id === commander.id);
-			const playerCommander: PlayerCommander = existingPc || {
+			const playerCommander: PlayerCommander = {
 				id: commander.id,
 				currentLevel: 0,
 				maxLevel: 0,
-				awakeningLevel: 0
+				awakeningLevel: 0,
+				...existingPc
 			};
 
 			return {
@@ -151,11 +152,12 @@ function createFriendshipStore() {
 
 		for (const mc of mergedCommanders) {
 			const existingPc = playerCommanders.find((pc) => pc.id === mc.id);
-			mc.playerCommander = existingPc || {
+			mc.playerCommander = {
 				id: mc.id,
 				currentLevel: 0,
 				maxLevel: 0,
-				awakeningLevel: 0
+				awakeningLevel: 0,
+				...existingPc
 			};
 		}
 
@@ -321,7 +323,13 @@ function createFriendshipStore() {
 							(pc: PlayerCommander) => pc.id === mc.id
 						);
 						if (imported) {
-							mc.playerCommander = imported;
+							mc.playerCommander = {
+								id: mc.id,
+								currentLevel: 0,
+								maxLevel: 0,
+								awakeningLevel: 0,
+								...imported
+							};
 						}
 					}
 					savePlayerCommanders();

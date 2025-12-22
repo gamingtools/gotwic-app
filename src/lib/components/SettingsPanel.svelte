@@ -4,9 +4,9 @@
 
 <div class="panel overflow-hidden">
 	<div class="panel-header px-4 py-2.5">
-		<h3 class="font-display font-bold tracking-wide text-[var(--color-gold)]">Settings</h3>
+		<h3 class="font-display font-bold tracking-wide text-(--color-gold)">Settings</h3>
 	</div>
-	<div class="divide-y divide-[var(--color-gold)]/10">
+	<div class="divide-y divide-(--color-gold)/10">
 		<label class="table-row-hover flex cursor-pointer items-center gap-3 px-4 py-3">
 			<input
 				type="checkbox"
@@ -15,7 +15,7 @@
 					friendshipStore.updateSetting('hideUnlocked', (e.target as HTMLInputElement).checked)}
 				class="checkbox-gold"
 			/>
-			<span class="text-[var(--color-parchment)]">Hide Locked Commanders</span>
+			<span class="text-(--color-parchment)">Hide Locked Commanders</span>
 		</label>
 		<label class="table-row-hover flex cursor-pointer items-center gap-3 px-4 py-3">
 			<input
@@ -25,7 +25,7 @@
 					friendshipStore.updateSetting('suggestUpgrades', (e.target as HTMLInputElement).checked)}
 				class="checkbox-gold"
 			/>
-			<span class="text-[var(--color-parchment)]">Suggest Quality Upgrades</span>
+			<span class="text-(--color-parchment)">Suggest Quality Upgrades</span>
 		</label>
 		<label class="table-row-hover flex cursor-pointer items-center gap-3 px-4 py-3">
 			<input
@@ -35,7 +35,7 @@
 					friendshipStore.updateSetting('suggestUnlocks', (e.target as HTMLInputElement).checked)}
 				class="checkbox-gold"
 			/>
-			<span class="text-[var(--color-parchment)]">Suggest Commander Unlocks</span>
+			<span class="text-(--color-parchment)">Suggest Commander Unlocks</span>
 		</label>
 	</div>
 </div>

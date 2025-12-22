@@ -48,7 +48,7 @@
 
 {#if open}
 	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-void)]/80 p-4 backdrop-blur-sm"
+		class="fixed inset-0 z-50 flex items-center justify-center bg-(--color-void)/80 p-4 backdrop-blur-sm"
 		onclick={handleBackdropClick}
 		onkeydown={handleKeydown}
 		role="dialog"
@@ -56,9 +56,9 @@
 		tabindex="-1"
 	>
 		<div class="panel animate-fade-in w-full max-w-md p-5">
-			<h2 class="mb-4 font-display text-lg text-[var(--color-gold)]">{title}</h2>
+			<h2 class="mb-4 font-display text-lg text-(--color-gold)">{title}</h2>
 
-			<div class="mb-6 text-[var(--color-parchment)]">
+			<div class="mb-6 text-(--color-parchment)">
 				{#if children}
 					{@render children()}
 				{/if}
@@ -67,14 +67,14 @@
 			<div class="flex justify-end gap-3">
 				<button
 					onclick={oncancel}
-					class="rounded border border-[var(--color-steel)] bg-[var(--color-slate)] px-4 py-2 text-sm text-[var(--color-ash)] transition-all hover:border-[var(--color-gold)]/30 hover:text-[var(--color-parchment)]"
+					class="rounded border border-(--color-steel) bg-(--color-slate) px-4 py-2 text-sm text-(--color-ash) transition-all hover:border-(--color-gold)/30 hover:text-(--color-parchment)"
 				>
 					{cancelText}
 				</button>
 				<button
 					onclick={onconfirm}
 					class="rounded px-4 py-2 text-sm transition-all {confirmDanger
-						? 'border border-[var(--color-crimson)]/50 bg-[var(--color-crimson)]/20 text-[var(--color-crimson)] hover:bg-[var(--color-crimson)]/30'
+						? 'border border-(--color-crimson)/50 bg-(--color-crimson)/20 text-(--color-crimson) hover:bg-(--color-crimson)/30'
 						: 'btn-gold'}"
 				>
 					{confirmText}

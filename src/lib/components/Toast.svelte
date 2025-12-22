@@ -10,13 +10,13 @@
 	const bgColors: Record<string, string> = {
 		success: 'bg-green-900/90 border-green-700/50',
 		error: 'bg-red-900/90 border-red-700/50',
-		info: 'bg-[var(--color-slate)]/95 border-[var(--color-gold)]/30'
+		info: 'bg-(--color-slate)/95 border-(--color-gold)/30'
 	};
 
 	const iconColors: Record<string, string> = {
 		success: 'text-green-400',
 		error: 'text-red-400',
-		info: 'text-[var(--color-gold)]'
+		info: 'text-(--color-gold)'
 	};
 </script>
 
@@ -30,10 +30,10 @@
 				<svg class="h-5 w-5 shrink-0 {iconColors[toast.type]}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={iconPaths[toast.type]} />
 				</svg>
-				<span class="text-sm text-[var(--color-parchment)]">{toast.message}</span>
+				<span class="text-sm text-(--color-parchment)">{toast.message}</span>
 				<button
 					onclick={() => toastStore.dismiss(toast.id)}
-					class="ml-2 text-[var(--color-ash)] hover:text-[var(--color-parchment)]"
+					class="ml-2 text-(--color-ash) hover:text-(--color-parchment)"
 					aria-label="Dismiss"
 				>
 					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -23,13 +23,13 @@
 <div class="panel overflow-hidden">
 	<div class="panel-header flex items-center justify-between px-4 py-2.5">
 		<div class="flex items-center gap-2">
-			<svg class="h-4 w-4 text-[var(--color-gold)]/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<svg class="h-4 w-4 text-(--color-gold)/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={giftIcons[giftType] || giftIcons.Book} />
 			</svg>
-			<h3 class="font-display font-bold tracking-wide text-[var(--color-gold)]">{giftType}</h3>
+			<h3 class="font-display font-bold tracking-wide text-(--color-gold)">{giftType}</h3>
 		</div>
 		<button
-			class="text-[var(--color-ash)] transition-colors hover:text-[var(--color-gold)]"
+			class="text-(--color-ash) transition-colors hover:text-(--color-gold)"
 			title="Shows commanders who prefer this gift, sorted by upgrade value. Higher = better value."
 			aria-label="Gift priority info"
 		>
@@ -43,24 +43,24 @@
 			</svg>
 		</button>
 	</div>
-	<div class="divide-y divide-[var(--color-gold)]/10">
+	<div class="divide-y divide-(--color-gold)/10">
 		{#if commanders.length === 0}
-			<div class="px-4 py-3 text-center text-[var(--color-ash)]">No commanders available</div>
+			<div class="px-4 py-3 text-center text-(--color-ash)">No commanders available</div>
 		{:else}
 			{#each commanders as commander, index}
 				<div class="table-row-hover flex items-center justify-between px-4 py-2">
 					<div class="flex items-center gap-2">
-						<span class="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-gold)]/10 text-xs text-[var(--color-gold)]/70">
+						<span class="flex h-5 w-5 items-center justify-center rounded-full bg-(--color-gold)/10 text-xs text-(--color-gold)/70">
 							{index + 1}
 						</span>
-						<span class="text-[var(--color-parchment)]">{commander.name}</span>
+						<span class="text-(--color-parchment)">{commander.name}</span>
 					</div>
 					<div class="flex items-center gap-2">
-						<span class="rounded bg-[var(--color-gold)]/15 px-2 py-0.5 text-xs font-medium tabular-nums text-[var(--color-gold)]">
+						<span class="rounded bg-(--color-gold)/15 px-2 py-0.5 text-xs font-bold tabular-nums text-(--color-gold)">
 							{commander.cost}
 						</span>
 						{#if commander.needsUnlock}
-							<span class="text-[var(--color-crimson)]" title="Needs Unlock">
+							<span class="text-(--color-crimson)" title="Needs Unlock">
 								<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
 									<path
 										fill-rule="evenodd"
@@ -71,7 +71,7 @@
 							</span>
 						{/if}
 						{#if commander.needsUpgrade}
-							<span class="text-[var(--quality-uncommon)]" title="Needs Quality Upgrade">
+							<span class="text-(--quality-uncommon)" title="Needs Quality Upgrade">
 								<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
 									<path
 										fill-rule="evenodd"
