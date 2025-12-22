@@ -104,14 +104,14 @@
 				<tr class="border-b border-[var(--color-gold)]/20 bg-gradient-to-r from-[var(--color-gold)]/10 via-[var(--color-gold)]/5 to-[var(--color-gold)]/10">
 					<th class="whitespace-nowrap pl-3 pr-2 lg:px-4 py-2 lg:py-3 text-left font-display text-sm font-medium tracking-wide text-[var(--color-gold)]">Name</th>
 					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] sm:table-cell">Gift</th>
-					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="2xl:hidden">Apt</span><span class="hidden 2xl:inline">Aptitude</span></th>
-					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="2xl:hidden">Fin</span><span class="hidden 2xl:inline">Finance</span></th>
-					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="2xl:hidden">Cmd</span><span class="hidden 2xl:inline">Command</span></th>
-					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="2xl:hidden">Cmbt</span><span class="hidden 2xl:inline">Combat</span></th>
-					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="2xl:hidden">Lead</span><span class="hidden 2xl:inline">Leadership</span></th>
+					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="3xl:hidden">Apt</span><span class="hidden 3xl:inline">Aptitude</span></th>
+					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="3xl:hidden">Fin</span><span class="hidden 3xl:inline">Finance</span></th>
+					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="3xl:hidden">Cmd</span><span class="hidden 3xl:inline">Command</span></th>
+					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="3xl:hidden">Cmbt</span><span class="hidden 3xl:inline">Combat</span></th>
+					<th class="hidden whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)] xl:table-cell"><span class="3xl:hidden">Lead</span><span class="hidden 3xl:inline">Leadership</span></th>
 					<th class="whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)]">Quality</th>
 					<th class="whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)]">Level</th>
-					<th class="whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)]"><span class="2xl:hidden">Awaken</span><span class="hidden 2xl:inline">Awakening</span></th>
+					<th class="whitespace-nowrap px-2 lg:px-4 py-2 lg:py-3 text-center font-display text-sm font-medium tracking-wide text-[var(--color-gold)]"><span class="3xl:hidden">Awaken</span><span class="hidden 3xl:inline">Awakening</span></th>
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-[var(--color-gold)]/10">

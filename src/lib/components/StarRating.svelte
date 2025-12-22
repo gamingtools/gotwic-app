@@ -8,10 +8,10 @@
 </script>
 
 <!-- Numbers on smaller screens -->
-<span class="tabular-nums text-[var(--color-gold)] 2xl:hidden">{value}</span>
+<span class="tabular-nums text-[var(--color-gold)] 3xl:hidden">{value}</span>
 
 <!-- Stars on larger screens -->
-<div class="hidden gap-0.5 2xl:flex">
+<div class="hidden gap-0.5 3xl:flex">
 	{#each Array(max) as _, i}
 		<svg
 			class="h-4 w-4 transition-colors {i < value ? 'text-[var(--color-gold)]' : 'text-[var(--color-steel)]/40'}"

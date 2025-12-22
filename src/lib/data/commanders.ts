@@ -704,6 +704,39 @@ export const commanders: Commander[] = [
 		combat: 4,
 		leadership: 0,
 		awakable: true
+	},
+	{
+		id: 'missandei',
+		name: 'Missandei',
+		preferredGift: 'Jewelry',
+		aptitude: 5,
+		finance: 5,
+		command: 0,
+		combat: 4,
+		leadership: 0,
+		awakable: true
+	},
+	{
+		id: 'bjorn',
+		name: 'Bjorn',
+		preferredGift: 'Weapon',
+		aptitude: 5,
+		finance: 5,
+		command: 0,
+		combat: 2,
+		leadership: 0,
+		awakable: true
+	},
+	{
+		id: 'brienne',
+		name: 'Brienne',
+		preferredGift: 'Weapon',
+		aptitude: 5,
+		finance: 5,
+		command: 0,
+		combat: 4,
+		leadership: 0,
+		awakable: true
 	}
 ];
 

@@ -9,10 +9,34 @@
 
 <svelte:head>
 	<title>GoTWiC - Friendship Calculator - Game of Thrones Winter is Coming</title>
-	<meta
-		name="description"
-		content="Optimize gift distribution to commanders in Game of Thrones: Winter is Coming"
-	/>
+	<meta name="description" content="Optimize gift distribution to commanders in Game of Thrones: Winter is Coming" />
+	<meta name="robots" content="index, follow" />
+
+	<!-- Schema.org -->
+	<meta itemprop="name" content="GoTWiC - Friendship Calculator - Game of Thrones Winter is Coming" />
+	<meta itemprop="description" content="Optimize gift distribution to commanders in Game of Thrones: Winter is Coming" />
+	<meta itemprop="image" content="https://gtcdn.info/gt/logo.png" />
+
+	<!-- Open Graph -->
+	<meta property="og:site_name" content="gaming.tools" />
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="GoTWiC - Friendship Calculator - Game of Thrones Winter is Coming" />
+	<meta property="og:description" content="Optimize gift distribution to commanders in Game of Thrones: Winter is Coming" />
+	<meta property="og:url" content="https://gaming.tools/gotwic/friendship" />
+	<meta property="og:locale" content="en" />
+	<meta property="og:image" content="https://gtcdn.info/gt/logo.png" />
+
+	<!-- Twitter -->
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:site" content="@gamingtoolsx" />
+	<meta name="twitter:title" content="GoTWiC - Friendship Calculator - Game of Thrones Winter is Coming" />
+	<meta name="twitter:description" content="Optimize gift distribution to commanders in Game of Thrones: Winter is Coming" />
+	<meta name="twitter:image" content="https://gtcdn.info/gt/logo.png" />
+	<meta name="twitter:creator" content="@gamingtoolsx" />
+	<meta name="twitter:domain" content="gaming.tools" />
+	<meta name="twitter:url" content="https://gaming.tools/gotwic/friendship" />
+
+	<link rel="canonical" href="https://gaming.tools/gotwic/friendship" />
 </svelte:head>
 
 <div class="min-h-screen">
