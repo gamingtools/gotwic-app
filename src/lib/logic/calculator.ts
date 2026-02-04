@@ -68,12 +68,21 @@ function isStarredAwakening(awakeningLevel: number | undefined): boolean {
 	return awakeningLevel >= 2;
 }
 
+// Get max level based on awakening level (60 base + 5 per awakening level)
+function getAwakeningMaxLevel(awakeningLevel: number | undefined): number {
+	return 60 + (awakeningLevel ?? 0) * 5;
+}
+
 // Calculate the value for upgrading a commander to the next level
 export function getValueForNextLevel(
 	playerCommander: PlayerCommander,
 	weights: CalculationWeights
 ): number {
-	if (playerCommander.currentLevel === 80) {
+	// Effective max is the lower of quality-based max and awakening-based max
+	const awakeningMax = getAwakeningMaxLevel(playerCommander.awakeningLevel);
+	const effectiveMax = Math.min(playerCommander.maxLevel, awakeningMax);
+
+	if (playerCommander.currentLevel >= effectiveMax) {
 		return 0;
 	}
 
