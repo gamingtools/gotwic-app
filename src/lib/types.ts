@@ -45,6 +45,7 @@ export interface MergedCommander extends Commander {
 // Profile settings
 export interface ProfileSettings {
 	hideUnlocked: boolean;
+	hideCompleted: boolean;
 	suggestUpgrades: boolean;
 	suggestUnlocks: boolean;
 }
@@ -77,6 +78,7 @@ export const DEFAULT_WEIGHTS: CalculationWeights = {
 // Default profile settings
 export const DEFAULT_PROFILE_SETTINGS: ProfileSettings = {
 	hideUnlocked: false,
+	hideCompleted: false,
 	suggestUpgrades: true,
 	suggestUnlocks: false
 };
