@@ -315,6 +315,16 @@ function createFriendshipStore() {
 			if (!profileSettings.suggestUpgrades) {
 				filtered = filtered.filter((mc) => !mc.needsUpgrade);
 			}
+			if (profileSettings.hideCompleted) {
+				filtered = filtered.filter(
+					(mc) =>
+						!(
+							mc.playerCommander.maxLevel === 80 &&
+							mc.playerCommander.currentLevel === 80 &&
+							mc.playerCommander.awakeningLevel === 4
+						)
+				);
+			}
 
 			return filtered.sort((a, b) => b.cost - a.cost);
 		},

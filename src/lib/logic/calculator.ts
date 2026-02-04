@@ -110,7 +110,8 @@ export function calculateNextLevelValues(request: CalculationRequest): Calculati
 	return request.commanders.map((pc) => ({
 		id: pc.id,
 		value: getValueForNextLevel(pc, request.weights),
-		needsUpgrade: pc.currentLevel === pc.maxLevel && pc.currentLevel !== 0,
+		// Needs upgrade if at max level for current quality, but not at Legendary (80) since that's the max
+		needsUpgrade: pc.currentLevel === pc.maxLevel && pc.currentLevel !== 0 && pc.maxLevel !== 80,
 		needsUnlock: pc.maxLevel === 0
 	}));
 }
