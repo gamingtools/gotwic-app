@@ -57,6 +57,8 @@ export interface CommanderQuality {
 	color: string;
 }
 
+export const MAX_AWAKENING_LEVEL = 4;
+
 export const COMMANDER_QUALITIES: CommanderQuality[] = [
 	{ title: 'None', maxLevel: 0, color: 'text-[var(--quality-none)]' },
 	{ title: 'Common', maxLevel: 10, color: 'text-[var(--quality-common)]' },

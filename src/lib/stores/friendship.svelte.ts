@@ -8,7 +8,7 @@ import type {
 } from '$lib/types';
 import { DEFAULT_WEIGHTS, DEFAULT_PROFILE_SETTINGS } from '$lib/types';
 import { commanders } from '$lib/data/commanders';
-import { calculateNextLevelValues } from '$lib/logic/calculator';
+import { calculateNextLevelValues, isCommanderCompleted } from '$lib/logic/calculator';
 
 // Storage keys
 const PROFILES_KEY = 'gw-fr-profiles';
@@ -194,14 +194,7 @@ function createFriendshipStore() {
 			}
 
 			if (profileSettings.hideCompleted) {
-				filtered = filtered.filter(
-					(mc) =>
-						!(
-							mc.playerCommander.maxLevel === 80 &&
-							mc.playerCommander.currentLevel === 80 &&
-							mc.playerCommander.awakeningLevel === 4
-						)
-				);
+				filtered = filtered.filter((mc) => !isCommanderCompleted(mc.playerCommander));
 			}
 
 			return filtered;
@@ -316,14 +309,7 @@ function createFriendshipStore() {
 				filtered = filtered.filter((mc) => !mc.needsUpgrade);
 			}
 			if (profileSettings.hideCompleted) {
-				filtered = filtered.filter(
-					(mc) =>
-						!(
-							mc.playerCommander.maxLevel === 80 &&
-							mc.playerCommander.currentLevel === 80 &&
-							mc.playerCommander.awakeningLevel === 4
-						)
-				);
+				filtered = filtered.filter((mc) => !isCommanderCompleted(mc.playerCommander));
 			}
 
 			return filtered.sort((a, b) => b.cost - a.cost);

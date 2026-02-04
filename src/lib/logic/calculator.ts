@@ -4,6 +4,7 @@ import type {
 	CalculationResult,
 	CalculationRequest
 } from '$lib/types';
+import { MAX_AWAKENING_LEVEL } from '$lib/types';
 import { getCommanderById } from '$lib/data/commanders';
 
 // Calculate XP points needed to level up from one level to another
@@ -69,8 +70,14 @@ function isStarredAwakening(awakeningLevel: number | undefined): boolean {
 }
 
 // Get max level based on awakening level (60 base + 5 per awakening level)
-function getAwakeningMaxLevel(awakeningLevel: number | undefined): number {
+export function getAwakeningMaxLevel(awakeningLevel: number | undefined): number {
 	return 60 + (awakeningLevel ?? 0) * 5;
+}
+
+// Check if a commander is fully completed (max quality, max level, max awakening)
+export function isCommanderCompleted(pc: PlayerCommander): boolean {
+	const awakeningMax = getAwakeningMaxLevel(MAX_AWAKENING_LEVEL);
+	return pc.maxLevel === awakeningMax && pc.currentLevel === awakeningMax && pc.awakeningLevel === MAX_AWAKENING_LEVEL;
 }
 
 // Calculate the value for upgrading a commander to the next level
