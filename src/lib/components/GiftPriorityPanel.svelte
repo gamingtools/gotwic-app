@@ -20,7 +20,7 @@
 	};
 </script>
 
-<div class="panel overflow-hidden">
+<div class="panel">
 	<div class="panel-header flex items-center justify-between px-4 py-2.5">
 		<div class="flex items-center gap-2">
 			<svg class="h-4 w-4 text-(--color-gold)/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,12 +48,34 @@
 			<div class="px-4 py-3 text-center text-(--color-ash)">No commanders available</div>
 		{:else}
 			{#each commanders as commander, index}
-				<div class="table-row-hover flex items-center justify-between px-4 py-2">
+				<div class="table-row-hover group relative flex items-center justify-between px-4 py-2">
 					<div class="flex items-center gap-2">
 						<span class="flex h-5 w-5 items-center justify-center rounded-full bg-(--color-gold)/10 text-xs text-(--color-gold)/70">
 							{index + 1}
 						</span>
 						<span class="text-(--color-parchment)">{commander.name}</span>
+					</div>
+					<!-- Tooltip -->
+					<div class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 opacity-0 transition-opacity group-hover:opacity-100">
+						<div class="rounded border border-(--color-gold)/30 bg-(--color-slate) px-3 py-2 text-xs shadow-lg">
+							<div class="mb-1.5 border-b border-(--color-gold)/20 pb-1.5 font-semibold text-(--color-gold)">{commander.name}</div>
+							<div class="grid grid-cols-2 gap-x-4 gap-y-0.5 text-(--color-parchment)">
+								<span class="text-(--color-ash)">Aptitude:</span><span class="text-right">{commander.aptitude}</span>
+								<span class="text-(--color-ash)">Finance:</span><span class="text-right">{commander.finance}</span>
+								<span class="text-(--color-ash)">Command:</span><span class="text-right">{commander.command}</span>
+								<span class="text-(--color-ash)">Combat:</span><span class="text-right">{commander.combat}</span>
+								<span class="text-(--color-ash)">Leadership:</span><span class="text-right">{commander.leadership}</span>
+							</div>
+							{#if commander.playerCommander.maxLevel > 0}
+								<div class="mt-1.5 border-t border-(--color-gold)/20 pt-1.5 text-(--color-ash)">
+									Level {commander.playerCommander.currentLevel}/{commander.playerCommander.maxLevel}
+									{#if commander.playerCommander.awakeningLevel > 0}
+										<span class="ml-2">Awaken: {commander.playerCommander.awakeningLevel}</span>
+									{/if}
+								</div>
+							{/if}
+						</div>
+						<div class="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-(--color-gold)/30"></div>
 					</div>
 					<div class="flex items-center gap-2">
 						<span class="rounded bg-(--color-gold)/15 px-2 py-0.5 text-xs font-bold tabular-nums text-(--color-gold)">

@@ -302,6 +302,9 @@ function createFriendshipStore() {
 				(mc) => mc.preferredGift === giftType && mc.cost >= 0
 			);
 
+			if (profileSettings.hideUnlocked) {
+				filtered = filtered.filter((mc) => mc.playerCommander.maxLevel > 0);
+			}
 			if (!profileSettings.suggestUnlocks) {
 				filtered = filtered.filter((mc) => !mc.needsUnlock);
 			}
