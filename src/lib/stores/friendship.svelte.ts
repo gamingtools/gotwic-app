@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import { base } from '$app/paths';
 import type {
 	CalculationWeights,
 	MergedCommander,
@@ -16,9 +17,9 @@ const PLAYER_COMMANDERS_KEY = 'gw-fr-playerCommanders';
 const WEIGHTS_KEY = 'gw-fr-calculationWeights';
 const SETTINGS_KEY = 'gw-fr-profileSettings';
 
-function getStorageKey(base: string, profileId: string): string {
+function getStorageKey(baseKey: string, profileId: string): string {
 	// Match Angular: use base key for 'default', append profileId for others
-	return profileId === 'default' ? base : base + profileId;
+	return profileId === 'default' ? baseKey : baseKey + profileId;
 }
 
 function loadFromStorage<T>(key: string, defaultValue: T): T {
@@ -42,6 +43,13 @@ function saveToStorage<T>(key: string, value: T): void {
 function removeFromStorage(key: string): void {
 	if (!browser) return;
 	localStorage.removeItem(key);
+}
+
+// Cloud profile data shape stored in R2
+interface CloudProfileData {
+	commanders: PlayerCommander[];
+	weights: CalculationWeights;
+	settings: ProfileSettings;
 }
 
 // Create the friendship store using Svelte 5 runes
@@ -97,6 +105,12 @@ function createFriendshipStore() {
 	let mergedCommanders = $state<MergedCommander[]>(initialMergedCommanders);
 	let lastSaved = $state<number>(0);
 
+	// Cloud mode state
+	let cloudMode = $state<boolean>(false);
+	let cloudLoading = $state<boolean>(false);
+	let cloudInitialized = false;
+	let cloudSaveTimer: ReturnType<typeof setTimeout> | null = null;
+
 	function recalculateCosts(): void {
 		const results = calculateNextLevelValues({
 			commanders: mergedCommanders.map((mc) => mc.playerCommander),
@@ -114,28 +128,66 @@ function createFriendshipStore() {
 		}
 	}
 
+	// Build current profile data for cloud save
+	function buildProfileData(): CloudProfileData {
+		return {
+			commanders: mergedCommanders.map((mc) => mc.playerCommander),
+			weights,
+			settings: profileSettings
+		};
+	}
+
+	// Debounced cloud save - writes entire profile to R2 via API
+	function scheduleCloudSave(): void {
+		if (!cloudMode || !browser) return;
+		if (cloudSaveTimer) clearTimeout(cloudSaveTimer);
+		cloudSaveTimer = setTimeout(async () => {
+			try {
+				await fetch(`${base}/api/profiles/${encodeURIComponent(currentProfileId)}`, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(buildProfileData())
+				});
+			} catch (e) {
+				console.error('Failed to save to cloud:', e);
+			}
+		}, 500);
+	}
+
 	function savePlayerCommanders(): void {
-		saveToStorage(
-			getStorageKey(PLAYER_COMMANDERS_KEY, currentProfileId),
-			mergedCommanders.map((mc) => mc.playerCommander)
-		);
+		if (!cloudMode) {
+			saveToStorage(
+				getStorageKey(PLAYER_COMMANDERS_KEY, currentProfileId),
+				mergedCommanders.map((mc) => mc.playerCommander)
+			);
+		}
 		recalculateCosts();
 		lastSaved = Date.now();
+		scheduleCloudSave();
 	}
 
 	function saveWeights(): void {
-		saveToStorage(getStorageKey(WEIGHTS_KEY, currentProfileId), weights);
+		if (!cloudMode) {
+			saveToStorage(getStorageKey(WEIGHTS_KEY, currentProfileId), weights);
+		}
 		recalculateCosts();
 		lastSaved = Date.now();
+		scheduleCloudSave();
 	}
 
 	function saveProfileSettings(): void {
-		saveToStorage(getStorageKey(SETTINGS_KEY, currentProfileId), profileSettings);
+		if (!cloudMode) {
+			saveToStorage(getStorageKey(SETTINGS_KEY, currentProfileId), profileSettings);
+		}
 		lastSaved = Date.now();
+		scheduleCloudSave();
 	}
 
 	function saveProfiles(): void {
-		saveToStorage(PROFILES_KEY, profiles);
+		if (!cloudMode) {
+			saveToStorage(PROFILES_KEY, profiles);
+		}
+		// In cloud mode, the profile list is derived from R2 objects, no need to save separately
 	}
 
 	function loadProfile(profileId: string): void {
@@ -164,6 +216,86 @@ function createFriendshipStore() {
 		}
 
 		recalculateCosts();
+	}
+
+	// Apply profile data from cloud response to in-memory state
+	function applyCloudData(data: CloudProfileData): void {
+		if (data.weights) {
+			weights = { ...DEFAULT_WEIGHTS, ...data.weights };
+		}
+		if (data.settings) {
+			profileSettings = { ...DEFAULT_PROFILE_SETTINGS, ...data.settings };
+		}
+
+		const playerCommanders = data.commanders || [];
+		for (const mc of mergedCommanders) {
+			const existing = playerCommanders.find((pc: PlayerCommander) => pc.id === mc.id);
+			mc.playerCommander = {
+				id: mc.id,
+				currentLevel: 0,
+				maxLevel: 0,
+				awakeningLevel: 0,
+				...existing
+			};
+		}
+
+		recalculateCosts();
+	}
+
+	// Load a profile from cloud API
+	async function loadCloudProfile(profileId: string): Promise<void> {
+		currentProfileId = profileId;
+		try {
+			const res = await fetch(
+				`${base}/api/profiles/${encodeURIComponent(profileId)}`
+			);
+			if (res.ok) {
+				const data = (await res.json()) as CloudProfileData | null;
+				if (data) {
+					applyCloudData(data);
+					return;
+				}
+			}
+		} catch (e) {
+			console.error('Failed to load cloud profile:', e);
+		}
+		// Profile doesn't exist in cloud yet - use defaults
+		weights = { ...DEFAULT_WEIGHTS };
+		profileSettings = { ...DEFAULT_PROFILE_SETTINGS };
+		for (const mc of mergedCommanders) {
+			mc.playerCommander = {
+				id: mc.id,
+				currentLevel: 0,
+				maxLevel: 0,
+				awakeningLevel: 0
+			};
+		}
+		recalculateCosts();
+	}
+
+	// Gather all localStorage profiles for migration
+	function gatherLocalProfiles(): Record<string, CloudProfileData> {
+		const localProfiles = loadFromStorage<string[]>(PROFILES_KEY, []);
+		if (!localProfiles || localProfiles.length === 0) return {};
+
+		const result: Record<string, CloudProfileData> = {};
+		for (const profileId of localProfiles) {
+			result[profileId] = {
+				commanders: loadFromStorage(
+					getStorageKey(PLAYER_COMMANDERS_KEY, profileId),
+					[]
+				),
+				weights: loadFromStorage(
+					getStorageKey(WEIGHTS_KEY, profileId),
+					{ ...DEFAULT_WEIGHTS }
+				),
+				settings: loadFromStorage(
+					getStorageKey(SETTINGS_KEY, profileId),
+					{ ...DEFAULT_PROFILE_SETTINGS }
+				)
+			};
+		}
+		return result;
 	}
 
 	// Initialize costs on load
@@ -204,10 +336,70 @@ function createFriendshipStore() {
 		get lastSaved() {
 			return lastSaved;
 		},
+		get cloudMode() {
+			return cloudMode;
+		},
+		get cloudLoading() {
+			return cloudLoading;
+		},
+
+		// Cloud initialization - called when session is available
+		async initCloud(): Promise<void> {
+			if (cloudInitialized || !browser) return;
+			cloudInitialized = true;
+			cloudLoading = true;
+
+			try {
+				// Fetch profile list from cloud
+				const res = await fetch(`${base}/api/profiles`);
+				if (!res.ok) {
+					console.error('Failed to fetch cloud profiles');
+					return;
+				}
+
+				const cloudProfiles: string[] = await res.json();
+
+				if (cloudProfiles.length === 0) {
+					// No cloud data yet - check localStorage for migration
+					const localData = gatherLocalProfiles();
+					const localProfileIds = Object.keys(localData);
+
+					if (localProfileIds.length > 0) {
+						// Migrate localStorage profiles to cloud
+						await fetch(`${base}/api/profiles`, {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ profiles: localData })
+						});
+						// Use existing in-memory state (already loaded from localStorage)
+						cloudMode = true;
+						return;
+					}
+
+					// No local data either - save current defaults to cloud
+					cloudMode = true;
+					scheduleCloudSave();
+					return;
+				}
+
+				// Cloud has profiles - load them
+				profiles = cloudProfiles;
+				await loadCloudProfile(cloudProfiles[0]);
+				cloudMode = true;
+			} catch (e) {
+				console.error('Failed to init cloud mode:', e);
+			} finally {
+				cloudLoading = false;
+			}
+		},
 
 		// Profile management
 		changeProfile(profileId: string): void {
-			loadProfile(profileId);
+			if (cloudMode) {
+				loadCloudProfile(profileId);
+			} else {
+				loadProfile(profileId);
+			}
 		},
 
 		addProfile(name: string): boolean {
@@ -216,8 +408,26 @@ function createFriendshipStore() {
 				return false;
 			}
 			profiles = [...profiles, sanitized];
-			saveProfiles();
-			loadProfile(sanitized);
+
+			if (cloudMode) {
+				// Set defaults for new profile in memory
+				currentProfileId = sanitized;
+				weights = { ...DEFAULT_WEIGHTS };
+				profileSettings = { ...DEFAULT_PROFILE_SETTINGS };
+				for (const mc of mergedCommanders) {
+					mc.playerCommander = {
+						id: mc.id,
+						currentLevel: 0,
+						maxLevel: 0,
+						awakeningLevel: 0
+					};
+				}
+				recalculateCosts();
+				scheduleCloudSave();
+			} else {
+				saveProfiles();
+				loadProfile(sanitized);
+			}
 			return true;
 		},
 
@@ -226,13 +436,27 @@ function createFriendshipStore() {
 				return false;
 			}
 
-			removeFromStorage(getStorageKey(PLAYER_COMMANDERS_KEY, currentProfileId));
-			removeFromStorage(getStorageKey(WEIGHTS_KEY, currentProfileId));
-			removeFromStorage(getStorageKey(SETTINGS_KEY, currentProfileId));
+			const deletedId = currentProfileId;
 
-			profiles = profiles.filter((p) => p !== currentProfileId);
-			saveProfiles();
-			loadProfile(profiles[0]);
+			if (cloudMode) {
+				// Delete from cloud (fire-and-forget)
+				fetch(`${base}/api/profiles/${encodeURIComponent(deletedId)}`, {
+					method: 'DELETE'
+				}).catch((e) => console.error('Failed to delete cloud profile:', e));
+			} else {
+				removeFromStorage(getStorageKey(PLAYER_COMMANDERS_KEY, currentProfileId));
+				removeFromStorage(getStorageKey(WEIGHTS_KEY, currentProfileId));
+				removeFromStorage(getStorageKey(SETTINGS_KEY, currentProfileId));
+			}
+
+			profiles = profiles.filter((p) => p !== deletedId);
+
+			if (cloudMode) {
+				loadCloudProfile(profiles[0]);
+			} else {
+				saveProfiles();
+				loadProfile(profiles[0]);
+			}
 			return true;
 		},
 

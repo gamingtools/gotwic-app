@@ -5,6 +5,15 @@
 	import SettingsPanel from '$lib/components/SettingsPanel.svelte';
 	import GiftPriorityPanel from '$lib/components/GiftPriorityPanel.svelte';
 	import { GIFT_TYPES } from '$lib/types';
+	import { page } from '$app/state';
+	import { friendshipStore } from '$lib/stores/friendship.svelte';
+
+	// Initialize cloud storage when user is signed in
+	$effect(() => {
+		if (page.data.session?.user?.id) {
+			friendshipStore.initCloud();
+		}
+	});
 </script>
 
 <svelte:head>
