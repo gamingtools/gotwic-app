@@ -1,16 +1,8 @@
 <script lang="ts">
 	import { friendshipStore } from '$lib/stores/friendship.svelte';
 	import { toastStore } from '$lib/stores/toast.svelte';
-	import Modal from './Modal.svelte';
-	import PromptModal from './PromptModal.svelte';
-
-	let fileInput: HTMLInputElement;
-	let resetBackup: string | null = $state(null);
-
-	// Modal states
-	let showAddProfileModal = $state(false);
-	let showDeleteProfileModal = $state(false);
-	let showResetModal = $state(false);
+	import { base } from '$app/paths';
+	import SigninDropdown from './auth/SigninDropdown.svelte';
 
 	function handleProfileChange(event: Event) {
 		const target = event.target as HTMLSelectElement;
@@ -18,101 +10,8 @@
 		toastStore.info(`Switched to ${target.value}`);
 	}
 
-	function askProfile() {
-		showAddProfileModal = true;
-	}
-
-	function handleAddProfile(name: string) {
-		showAddProfileModal = false;
-		if (friendshipStore.addProfile(name)) {
-			toastStore.success(`Profile "${name}" created`);
-		} else {
-			toastStore.error('Invalid or duplicate profile name');
-		}
-	}
-
-	function deleteProfile() {
-		showDeleteProfileModal = true;
-	}
-
-	function confirmDeleteProfile() {
-		showDeleteProfileModal = false;
-		const name = friendshipStore.currentProfileId;
-		friendshipStore.deleteProfile();
-		toastStore.success(`Profile "${name}" deleted`);
-	}
-
-	function exportData() {
-		const data = friendshipStore.exportProfile();
-		const blob = new Blob([data], { type: 'application/json' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = `${friendshipStore.currentProfileId}.json`;
-		a.click();
-		URL.revokeObjectURL(url);
-		toastStore.success('Profile exported');
-	}
-
-	function importData() {
-		fileInput?.click();
-	}
-
-	function handleFileChange(event: Event) {
-		const target = event.target as HTMLInputElement;
-		const file = target.files?.[0];
-		if (!file) return;
-
-		const fileName = file.name.replace('.json', '');
-		if (friendshipStore.currentProfileId !== fileName) {
-			if (friendshipStore.profiles.includes(fileName)) {
-				friendshipStore.changeProfile(fileName);
-			} else {
-				friendshipStore.addProfile(fileName);
-			}
-		}
-
-		const reader = new FileReader();
-		reader.onload = () => {
-			const result = reader.result as string;
-			if (friendshipStore.importProfile(result)) {
-				toastStore.success('Profile imported successfully');
-			} else {
-				toastStore.error('Failed to import profile data');
-			}
-		};
-		reader.readAsText(file);
-		target.value = '';
-	}
-
-	function resetData() {
-		showResetModal = true;
-	}
-
-	function confirmResetData() {
-		showResetModal = false;
-		// Store backup for undo
-		resetBackup = friendshipStore.exportProfile();
-		friendshipStore.resetProfile();
-		toastStore.info('Profile reset. Click here to undo.');
-
-		// Clear backup after 10 seconds
-		setTimeout(() => {
-			resetBackup = null;
-		}, 10000);
-	}
-
-	function undoReset() {
-		if (resetBackup) {
-			friendshipStore.importProfile(resetBackup);
-			resetBackup = null;
-			toastStore.success('Reset undone');
-		}
-	}
-
 	let showGuide = $state(false);
 
-	// Disable body scroll when guide modal is open
 	$effect(() => {
 		if (showGuide) {
 			document.body.style.overflow = 'hidden';
@@ -130,19 +29,19 @@
 	<!-- Top decorative line -->
 	<div class="h-px bg-gradient-to-r from-transparent via-(--color-gold)/40 to-transparent"></div>
 
-	<div class="mx-auto flex max-w-[1600px] flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-6">
-		<!-- Title -->
-		<div class="flex items-center gap-3">
-			<div class="flex h-9 w-9 items-center justify-center rounded border border-(--color-gold)/30 bg-(--color-gold)/10">
-				<svg class="h-5 w-5 text-(--color-gold)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+	<div class="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-4 py-3 lg:px-6">
+		<!-- Left: Title -->
+		<div class="flex items-center gap-2">
+			<div class="flex h-8 w-8 items-center justify-center rounded border border-(--color-gold)/30 bg-(--color-gold)/10">
+				<svg class="h-4 w-4 text-(--color-gold)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
 				</svg>
 			</div>
-			<h1 class="font-got text-lg lg:text-xl tracking-wide text-(--color-gold)">Friendship Calculator</h1>
+			<h1 class="font-got text-base lg:text-lg tracking-wide text-(--color-gold)">Friendship Calculator</h1>
 		</div>
 
-		<!-- Profile Selection -->
-		<div class="flex flex-wrap items-center gap-2">
+		<!-- Right: Profile + Actions + Sign in -->
+		<div class="flex items-center gap-2">
 			<div class="flex items-center gap-2 rounded border border-(--color-gold)/20 bg-(--color-void)/50 px-2 py-1">
 				<svg class="h-4 w-4 text-(--color-ash)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -156,91 +55,51 @@
 						<option value={profile} class="bg-(--color-slate) text-(--color-parchment)">{profile}</option>
 					{/each}
 				</select>
+				{#if friendshipStore.cloudMode}
+					<svg class="h-3.5 w-3.5 text-(--color-gold)/70" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Cloud synced">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+					</svg>
+				{/if}
 			</div>
 
-			<button
-				onclick={askProfile}
-				class="btn-gold flex items-center gap-1.5 rounded px-2 py-1 lg:px-2.5 lg:py-1.5 text-xs lg:text-sm"
+			<a
+				href="{base}/friendship/profiles"
+				class="flex items-center gap-1.5 rounded border border-(--color-steel) bg-(--color-slate) px-2 py-1 lg:px-2.5 lg:py-1.5 text-xs lg:text-sm text-(--color-ash) transition-all hover:border-(--color-gold)/30 hover:text-(--color-parchment)"
 			>
 				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
 				</svg>
-				<span class="hidden sm:inline">Add</span>
-			</button>
+				<span class="hidden sm:inline">Manage</span>
+			</a>
 
-			{#if friendshipStore.profiles.length > 1}
-				<button
-					onclick={deleteProfile}
-					class="flex items-center gap-1.5 rounded border border-(--color-crimson)/30 bg-(--color-crimson)/10 px-2 py-1 lg:px-2.5 lg:py-1.5 text-xs lg:text-sm text-(--color-crimson) transition-all hover:border-(--color-crimson)/50 hover:bg-(--color-crimson)/20"
-				>
-					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
-					</svg>
-					<span class="hidden sm:inline">Delete</span>
-				</button>
-			{/if}
-		</div>
-
-		<!-- Data Actions -->
-		<div class="flex flex-wrap items-center gap-2">
-			<button onclick={exportData} class="btn-gold flex items-center gap-1.5 rounded px-2 py-1 lg:px-2.5 lg:py-1.5 text-xs lg:text-sm">
-				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-				</svg>
-				<span class="hidden sm:inline">Export</span>
-			</button>
-
-			<button onclick={importData} class="btn-gold flex items-center gap-1.5 rounded px-2 py-1 lg:px-2.5 lg:py-1.5 text-xs lg:text-sm">
-				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-				</svg>
-				<span class="hidden sm:inline">Import</span>
-			</button>
-
-			<input bind:this={fileInput} type="file" accept=".json" class="hidden" onchange={handleFileChange} />
-
-			<button onclick={resetData} class="btn-gold flex items-center gap-1.5 rounded px-2 py-1 lg:px-2.5 lg:py-1.5 text-xs lg:text-sm">
-				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-				</svg>
-				<span class="hidden sm:inline">Reset</span>
-			</button>
-
-			{#if resetBackup}
-				<button
-					onclick={undoReset}
-					class="flex items-center gap-1.5 rounded border border-(--color-gold) bg-(--color-gold)/20 px-2 py-1 lg:px-2.5 lg:py-1.5 text-xs lg:text-sm text-(--color-gold) transition-all hover:bg-(--color-gold)/30 animate-pulse"
-				>
-					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-					</svg>
-					<span>Undo</span>
-				</button>
-			{/if}
-
-			<div class="mx-1 hidden h-6 w-px bg-(--color-steel)/50 sm:block"></div>
+			<div class="mx-0.5 hidden h-6 w-px bg-(--color-steel)/50 sm:block"></div>
 
 			<a
 				href="https://gaming.tools/discord"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="flex items-center gap-1.5 rounded border border-(--color-steel) bg-(--color-slate) px-2 py-1 lg:px-2.5 lg:py-1.5 text-xs lg:text-sm text-(--color-ash) transition-all hover:border-[#5865F2]/50 hover:text-[#5865F2]"
+				class="flex h-8 w-8 items-center justify-center rounded text-(--color-ash) transition-colors hover:text-[#5865F2]"
+				aria-label="Discord"
 			>
 				<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
 					<path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.947 2.418-2.157 2.418z"/>
 				</svg>
-				<span class="hidden sm:inline">Discord</span>
 			</a>
 
 			<button
 				onclick={() => (showGuide = true)}
-				class="flex items-center gap-1.5 rounded border border-(--color-steel) bg-(--color-slate) px-2 py-1 lg:px-2.5 lg:py-1.5 text-xs lg:text-sm text-(--color-ash) transition-all hover:border-(--color-gold)/30 hover:text-(--color-parchment)"
+				class="flex h-8 w-8 items-center justify-center rounded text-(--color-ash) transition-colors hover:text-(--color-parchment)"
+				aria-label="Guide"
 			>
 				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 				</svg>
-				<span class="hidden sm:inline">Guide</span>
 			</button>
+
+			<div class="h-5 w-px bg-(--color-steel)/40"></div>
+
+			<SigninDropdown />
 		</div>
 	</div>
 
@@ -335,37 +194,3 @@
 		</div>
 	</div>
 {/if}
-
-<!-- Add Profile Modal -->
-<PromptModal
-	open={showAddProfileModal}
-	title="Add New Profile"
-	placeholder="Enter profile name (letters and numbers only)"
-	confirmText="Create"
-	onconfirm={handleAddProfile}
-	oncancel={() => (showAddProfileModal = false)}
-/>
-
-<!-- Delete Profile Modal -->
-<Modal
-	open={showDeleteProfileModal}
-	title="Delete Profile"
-	confirmText="Delete"
-	confirmDanger={true}
-	onconfirm={confirmDeleteProfile}
-	oncancel={() => (showDeleteProfileModal = false)}
->
-	Are you sure you want to permanently delete the profile "{friendshipStore.currentProfileId}"?
-</Modal>
-
-<!-- Reset Data Modal -->
-<Modal
-	open={showResetModal}
-	title="Reset Profile Data"
-	confirmText="Reset"
-	confirmDanger={true}
-	onconfirm={confirmResetData}
-	oncancel={() => (showResetModal = false)}
->
-	This will reset all commander data for the current profile. Are you sure?
-</Modal>
