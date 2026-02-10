@@ -8,7 +8,7 @@ import type {
 } from '$lib/types';
 import { DEFAULT_WEIGHTS, DEFAULT_PROFILE_SETTINGS } from '$lib/types';
 import { commanders } from '$lib/data/commanders';
-import { calculateNextLevelValues } from '$lib/logic/calculator';
+import { calculateNextLevelValues, isCommanderCompleted } from '$lib/logic/calculator';
 
 // Storage keys
 const PROFILES_KEY = 'gw-fr-profiles';
@@ -189,10 +189,17 @@ function createFriendshipStore() {
 			return mergedCommanders;
 		},
 		get visibleCommanders() {
+			let filtered = mergedCommanders;
+
 			if (profileSettings.hideUnlocked) {
-				return mergedCommanders.filter((mc) => mc.playerCommander.maxLevel > 0);
+				filtered = filtered.filter((mc) => mc.playerCommander.maxLevel > 0);
 			}
-			return mergedCommanders;
+
+			if (profileSettings.hideCompleted) {
+				filtered = filtered.filter((mc) => !isCommanderCompleted(mc.playerCommander));
+			}
+
+			return filtered;
 		},
 		get lastSaved() {
 			return lastSaved;
@@ -297,11 +304,17 @@ function createFriendshipStore() {
 				(mc) => mc.preferredGift === giftType && mc.cost >= 0
 			);
 
+			if (profileSettings.hideUnlocked) {
+				filtered = filtered.filter((mc) => mc.playerCommander.maxLevel > 0);
+			}
 			if (!profileSettings.suggestUnlocks) {
 				filtered = filtered.filter((mc) => !mc.needsUnlock);
 			}
 			if (!profileSettings.suggestUpgrades) {
 				filtered = filtered.filter((mc) => !mc.needsUpgrade && !mc.needsAwakeningUpgrade);
+			}
+			if (profileSettings.hideCompleted) {
+				filtered = filtered.filter((mc) => !isCommanderCompleted(mc.playerCommander));
 			}
 
 			return filtered.sort((a, b) => b.cost - a.cost);

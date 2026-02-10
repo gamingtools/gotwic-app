@@ -46,6 +46,7 @@ export interface MergedCommander extends Commander {
 // Profile settings
 export interface ProfileSettings {
 	hideUnlocked: boolean;
+	hideCompleted: boolean;
 	suggestUpgrades: boolean;
 	suggestUnlocks: boolean;
 }
@@ -56,6 +57,8 @@ export interface CommanderQuality {
 	maxLevel: number;
 	color: string;
 }
+
+export const MAX_AWAKENING_LEVEL = 4;
 
 export const COMMANDER_QUALITIES: CommanderQuality[] = [
 	{ title: 'None', maxLevel: 0, color: 'text-[var(--quality-none)]' },
@@ -78,6 +81,7 @@ export const DEFAULT_WEIGHTS: CalculationWeights = {
 // Default profile settings
 export const DEFAULT_PROFILE_SETTINGS: ProfileSettings = {
 	hideUnlocked: false,
+	hideCompleted: false,
 	suggestUpgrades: true,
 	suggestUnlocks: false
 };
