@@ -40,6 +40,7 @@ export interface MergedCommander extends Commander {
 	cost: number;
 	needsUnlock: boolean;
 	needsUpgrade: boolean;
+	needsAwakeningUpgrade: boolean;
 }
 
 // Profile settings
@@ -92,6 +93,7 @@ export interface CalculationResult {
 	id: string;
 	value: number;
 	needsUpgrade: boolean;
+	needsAwakeningUpgrade: boolean;
 	needsUnlock: boolean;
 }
 

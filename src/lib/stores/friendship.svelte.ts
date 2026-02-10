@@ -83,7 +83,8 @@ function createFriendshipStore() {
 				playerCommander,
 				cost: 0,
 				needsUnlock: false,
-				needsUpgrade: false
+				needsUpgrade: false,
+				needsAwakeningUpgrade: false
 			};
 		})
 		.sort((a, b) => a.name.localeCompare(b.name));
@@ -108,6 +109,7 @@ function createFriendshipStore() {
 				mc.cost = result.value;
 				mc.needsUnlock = result.needsUnlock;
 				mc.needsUpgrade = result.needsUpgrade;
+				mc.needsAwakeningUpgrade = result.needsAwakeningUpgrade;
 			}
 		}
 	}
@@ -299,7 +301,7 @@ function createFriendshipStore() {
 				filtered = filtered.filter((mc) => !mc.needsUnlock);
 			}
 			if (!profileSettings.suggestUpgrades) {
-				filtered = filtered.filter((mc) => !mc.needsUpgrade);
+				filtered = filtered.filter((mc) => !mc.needsUpgrade && !mc.needsAwakeningUpgrade);
 			}
 
 			return filtered.sort((a, b) => b.cost - a.cost);
