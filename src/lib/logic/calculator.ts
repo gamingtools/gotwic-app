@@ -120,11 +120,18 @@ export function getValueForNextLevel(
 
 // Calculate values for all commanders
 export function calculateNextLevelValues(request: CalculationRequest): CalculationResult[] {
-	return request.commanders.map((pc) => ({
-		id: pc.id,
-		value: getValueForNextLevel(pc, request.weights),
-		// Needs upgrade if at max level for current quality, but not at Legendary (80) since that's the max
-		needsUpgrade: pc.currentLevel === pc.maxLevel && pc.currentLevel !== 0 && pc.maxLevel !== 80,
-		needsUnlock: pc.maxLevel === 0
-	}));
+	return request.commanders.map((pc) => {
+		const awakeningMax = getAwakeningMaxLevel(pc.awakeningLevel);
+		const atAwakeningCap = pc.currentLevel >= awakeningMax && awakeningMax < pc.maxLevel;
+		const atQualityCap = pc.currentLevel >= pc.maxLevel;
+		const isCompleted = isCommanderCompleted(pc);
+
+		return {
+			id: pc.id,
+			value: getValueForNextLevel(pc, request.weights),
+			needsUpgrade: atQualityCap && pc.currentLevel !== 0 && !isCompleted,
+			needsAwakeningUpgrade: atAwakeningCap && !atQualityCap && pc.currentLevel !== 0,
+			needsUnlock: pc.maxLevel === 0
+		};
+	});
 }
