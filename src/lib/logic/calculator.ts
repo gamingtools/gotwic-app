@@ -124,11 +124,12 @@ export function calculateNextLevelValues(request: CalculationRequest): Calculati
 		const awakeningMax = getAwakeningMaxLevel(pc.awakeningLevel);
 		const atAwakeningCap = pc.currentLevel >= awakeningMax && awakeningMax < pc.maxLevel;
 		const atQualityCap = pc.currentLevel >= pc.maxLevel;
+		const isCompleted = isCommanderCompleted(pc);
 
 		return {
 			id: pc.id,
 			value: getValueForNextLevel(pc, request.weights),
-			needsUpgrade: atQualityCap && pc.currentLevel !== 0,
+			needsUpgrade: atQualityCap && pc.currentLevel !== 0 && !isCompleted,
 			needsAwakeningUpgrade: atAwakeningCap && !atQualityCap && pc.currentLevel !== 0,
 			needsUnlock: pc.maxLevel === 0
 		};
