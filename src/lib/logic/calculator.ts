@@ -78,11 +78,9 @@ export function getValueForNextLevel(
 	playerCommander: PlayerCommander,
 	weights: CalculationWeights
 ): number {
-	// Effective max is the lower of quality-based max and awakening-based max
-	const awakeningMax = getAwakeningMaxLevel(playerCommander.awakeningLevel);
-	const effectiveMax = Math.min(playerCommander.maxLevel, awakeningMax);
-
-	if (playerCommander.currentLevel >= effectiveMax) {
+	// Only return 0 if at quality cap (the true maximum)
+	// For awakening cap, we still show potential value to help prioritize awakening upgrades
+	if (playerCommander.currentLevel >= playerCommander.maxLevel) {
 		return 0;
 	}
 
